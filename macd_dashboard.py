@@ -42,15 +42,25 @@ def get_vwap(data):
 def check_cross(macd, signal):
     macd = macd.dropna()
     signal = signal.dropna()
+
     if len(macd) < 2 or len(signal) < 2:
         return "No signal"
-    if macd.iloc[-2] < signal.iloc[-2] and macd.iloc[-1] > signal.iloc[-1]:
-        return "📈 BUY SIGNAL"
-    elif macd.iloc[-2] > signal.iloc[-2] and macd.iloc[-1] < signal.iloc[-1]:
-        return "📉 SELL SIGNAL"
-    else:
-        return "No crossover"
 
+    macd_prev = macd.iloc[-2]
+    macd_now = macd.iloc[-1]
+    sig_prev = signal.iloc[-2]
+    sig_now = signal.iloc[-1]
+
+    try:
+        if pd.notna(macd_prev) and pd.notna(sig_prev) and pd.notna(macd_now) and pd.notna(sig_now):
+            if macd_prev < sig_prev and macd_now > sig_now:
+                return "📈 BUY SIGNAL"
+            elif macd_prev > sig_prev and macd_now < sig_now:
+                return "📉 SELL SIGNAL"
+    except Exception:
+        return "No signal"
+
+    return "No crossover"
 def send_email_alert(subject, body, to_email, from_email, password):
     try:
         msg = MIMEText(body)
