@@ -95,7 +95,24 @@ def render_dashboard():
     alert = check_cross(macd, signal)
     last_price = data['Close'].iloc[-1]
 
-    st.subheader(f"{ticker_input} - Price: ${last_price:.2f} | {alert}")
+    def render_dashboard():
+    data = load_data(ticker_input)
+    if data.empty or 'Close' not in data or data['Close'].isna().all():
+        st.error("No price data available for this ticker and interval.")
+        return
+
+    macd, signal = get_macd(data)
+    vwap = get_vwap(data)
+    alert = check_cross(macd, signal)
+    last_price = data['Close'].iloc[-1]
+
+    if pd.isna(last_price):
+        st.error("No valid last price found for this ticker.")
+        return
+
+    price_display = f"${last_price:.2f}" if last_price is not None and not pd.isna(last_price) else "N/A"
+    st.subheader(f"{ticker_input} – Price: {price_display} | {alert}")
+    # ... rest of your dashboard code ...
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.plot(data.index[-100:], macd[-100:], label="MACD", color="blue")
     ax.plot(data.index[-100:], signal[-100:], label="Signal", color="red")
